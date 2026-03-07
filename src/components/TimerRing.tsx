@@ -72,7 +72,7 @@ export default function TimerRing({
           fill="transparent"
           strokeDasharray={`${circumference} ${circumference}`}
           animatedProps={glowProps}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           rotation="-90"
           origin={`${center}, ${center}`}
           opacity={0.15}
@@ -87,7 +87,7 @@ export default function TimerRing({
           fill="transparent"
           strokeDasharray={`${circumference} ${circumference}`}
           animatedProps={animatedProps}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           rotation="-90"
           origin={`${center}, ${center}`}
         />

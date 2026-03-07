@@ -254,7 +254,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     endTimeRef.current = Date.now() + remaining * 1000;
     dispatch({ type: 'START' });
     startInterval();
-    if (settings.hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (settings.hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     // Schedule background notification
     const phase = stateRef.current.phase;
     const label = phase === 'work' ? 'Focus session' : phase === 'shortBreak' ? 'Short break' : 'Long break';

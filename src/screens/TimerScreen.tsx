@@ -111,8 +111,8 @@ export default function TimerScreen() {
           {phase === 'work'
             ? `${settings.pomodorosBeforeLongBreak - cyclePosition} until long break`
             : phase === 'shortBreak'
-              ? 'Short break — stretch & breathe'
-              : 'Long break — you earned it 🎉'}
+              ? 'short break — stretch & breathe'
+              : 'long break — you earned it 🎉'}
         </Text>
       </SafeAreaView>
 
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   appTitle: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerRight: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   timeDisplay: {
     fontSize: 64,
-    fontWeight: '200',
+    fontWeight: '800',
     letterSpacing: -2,
     fontVariant: ['tabular-nums'],
   },
