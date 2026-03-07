@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Chronr",
+    "slug": "chronr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#283618"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "xyz.spacr.chronr",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#283618"
+      },
+      "package": "xyz.spacr.chronr"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "sounds": []
+        }
+      ],
+      [
+        "expo-haptics",
+        {}
+      ]
+    ]
+  }
+}
