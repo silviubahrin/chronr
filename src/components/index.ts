@@ -4,3 +4,4 @@ export { default as ControlButtons } from './ControlButtons';
 export { default as ThemeToggle } from './ThemeToggle';
 export { default as SettingsSheet } from './SettingsSheet';
 export { default as LogSheet } from './LogSheet';
+export { default as PhaseSwitcherSheet } from './PhaseSwitcherSheet';

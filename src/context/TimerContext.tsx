@@ -43,7 +43,8 @@ type TimerAction =
   | { type: 'COMPLETE'; nextPhase: Phase; nextDuration: number }
   | { type: 'ADD_SESSION'; session: SessionEntry }
   | { type: 'SET_PHASE'; phase: Phase; duration: number }
-  | { type: 'RESTORE_TODAY'; count: number; sessions: SessionEntry[] };
+  | { type: 'RESTORE_TODAY'; count: number; sessions: SessionEntry[] }
+  | { type: 'UNDO' };
 
 interface TimerContextValue {
   state: TimerState;
@@ -54,6 +55,9 @@ interface TimerContextValue {
   resume: () => void;
   reset: () => void;
   skip: () => void;
+  undo: () => void;
+  canUndo: boolean;
+  setPhase: (phase: Phase) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,6 +105,23 @@ function reducer(state: TimerState, action: TimerAction): TimerState {
       return { ...state, phase: action.phase, status: 'idle', remaining: action.duration };
     case 'RESTORE_TODAY':
       return { ...state, todayCount: action.count, sessions: action.sessions };
+    case 'UNDO': {
+      if (state.sessions.length === 0) return state;
+      const lastSession = state.sessions[0];
+      const newSessions = state.sessions.slice(1);
+      const newTodayCount = lastSession.phase === 'work' ? Math.max(0, state.todayCount - 1) : state.todayCount;
+      const newCycleCount = lastSession.phase === 'work' ? Math.max(0, state.cycleCount - 1) : state.cycleCount;
+
+      return {
+        ...state,
+        phase: lastSession.phase,
+        status: 'idle',
+        remaining: lastSession.durationSeconds,
+        sessions: newSessions,
+        todayCount: newTodayCount,
+        cycleCount: newCycleCount,
+      };
+    }
     default:
       return state;
   }
@@ -295,6 +316,27 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     handleComplete();
   }, [stopInterval, handleComplete]);
 
+  const canUndo = state.sessions.length > 0;
+
+  const undo = useCallback(() => {
+    stopInterval();
+    endTimeRef.current = null;
+    cancelTimerNotification();
+    dispatch({ type: 'UNDO' });
+    if (settings.hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, [stopInterval, settings.hapticsEnabled]);
+
+  const setPhase = useCallback(
+    (phase: Phase) => {
+      stopInterval();
+      endTimeRef.current = null;
+      cancelTimerNotification();
+      dispatch({ type: 'SET_PHASE', phase, duration: getDuration(phase) });
+      if (settings.hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    },
+    [stopInterval, getDuration, settings.hapticsEnabled]
+  );
+
   // Cleanup on unmount
   useEffect(() => () => stopInterval(), [stopInterval]);
 
@@ -302,7 +344,19 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <TimerContext.Provider
-      value={{ state, totalSeconds, progress, start, pause, resume, reset, skip }}
+      value={{
+        state,
+        totalSeconds,
+        progress,
+        start,
+        pause,
+        resume,
+        reset,
+        skip,
+        undo,
+        canUndo,
+        setPhase,
+      }}
     >
       {children}
     </TimerContext.Provider>

@@ -6,35 +6,56 @@ import type { TimerStatus } from '../context';
 
 interface ControlButtonsProps {
   status: TimerStatus;
+  progress: number;
+  canUndo: boolean;
   accentColor: string;
   onStart: () => void;
   onPause: () => void;
   onResume: () => void;
   onReset: () => void;
+  onUndo: () => void;
   onSkip: () => void;
 }
 
 export default function ControlButtons({
   status,
+  progress,
+  canUndo,
   accentColor,
   onStart,
   onPause,
   onResume,
   onReset,
+  onUndo,
   onSkip,
 }: ControlButtonsProps) {
   const { colors } = useTheme();
 
   return (
     <View style={styles.container}>
-      {/* Reset button */}
-      <TouchableOpacity
-        style={[styles.secondaryBtn, { backgroundColor: colors.bgElevated, borderColor: colors.border }]}
-        onPress={onReset}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="refresh" size={22} color={colors.textSecondary} />
-      </TouchableOpacity>
+      {/* Left Button: Undo or Reset */}
+      {progress === 0 && canUndo ? (
+        <TouchableOpacity
+          style={[styles.secondaryBtn, { backgroundColor: colors.bgElevated, borderColor: colors.border }]}
+          onPress={onUndo}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-undo" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={[
+            styles.secondaryBtn,
+            { backgroundColor: colors.bgElevated, borderColor: colors.border },
+            progress === 0 && { opacity: 0.5 }
+          ]}
+          onPress={onReset}
+          activeOpacity={0.7}
+          disabled={progress === 0}
+        >
+          <Ionicons name="refresh" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
+      )}
 
       {/* Primary play/pause button */}
       {status === 'idle' && (

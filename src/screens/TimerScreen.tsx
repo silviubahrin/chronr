@@ -6,16 +6,17 @@ import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import BottomSheet from '@gorhom/bottom-sheet';
 import { getPhaseColor, getPhaseLabel } from '../constants/colors';
 import { useTimer, useTheme, useSettings } from '../context';
-import { TimerRing, SessionDots, ControlButtons, ThemeToggle, SettingsSheet, LogSheet } from '../components';
+import { TimerRing, SessionDots, ControlButtons, ThemeToggle, SettingsSheet, LogSheet, PhaseSwitcherSheet } from '../components';
 import { formatTime, requestNotificationPermissions } from '../utils';
 
 export default function TimerScreen() {
-  const { state, progress, start, pause, resume, reset, skip } = useTimer();
+  const { state, progress, start, pause, resume, reset, skip, undo, canUndo, setPhase } = useTimer();
   const { settings } = useSettings();
   const { colors } = useTheme();
 
   const settingsRef = useRef<BottomSheet>(null);
   const logRef = useRef<BottomSheet>(null);
+  const phaseRef = useRef<BottomSheet>(null);
 
   // Request notification permissions on first mount
   useEffect(() => {
@@ -30,10 +31,13 @@ export default function TimerScreen() {
   const openSettings = useCallback(() => settingsRef.current?.snapToIndex(0), []);
   const openLog = useCallback(() => logRef.current?.snapToIndex(0), []);
 
-  // Subtle animated background tint per phase
   const bgStyle = useAnimatedStyle(() => ({
     backgroundColor: withTiming(colors.bg, { duration: 600 }),
   }));
+
+  const onPillPress = useCallback(() => {
+    phaseRef.current?.snapToIndex(0);
+  }, []);
 
   return (
     <Animated.View style={[styles.root, bgStyle]}>
@@ -43,10 +47,16 @@ export default function TimerScreen() {
           <Text style={[styles.appTitle, { color: colors.textPrimary }]}>chronr</Text>
 
           <View style={styles.headerRight}>
-            <View style={[styles.phasePill, { borderColor: accentColor + '60' }]}>
+            <TouchableOpacity
+              testID="phase-pill"
+              style={[styles.phasePill, { borderColor: accentColor + '60' }]}
+              onPress={onPillPress}
+              activeOpacity={0.7}
+            >
               <View style={[styles.phaseDot, { backgroundColor: accentColor }]} />
               <Text style={[styles.phaseText, { color: accentColor }]}>{phaseLabel}</Text>
-            </View>
+              <Ionicons name="chevron-down" size={12} color={accentColor} style={{ marginLeft: 2 }} />
+            </TouchableOpacity>
             <ThemeToggle />
             <TouchableOpacity
               style={[styles.iconBtn, { backgroundColor: colors.bgElevated, borderColor: colors.border }]}
@@ -97,11 +107,14 @@ export default function TimerScreen() {
         <View style={styles.controlsContainer}>
           <ControlButtons
             status={state.status}
+            progress={progress}
+            canUndo={canUndo}
             accentColor={accentColor}
             onStart={start}
             onPause={pause}
             onResume={resume}
             onReset={reset}
+            onUndo={undo}
             onSkip={skip}
           />
         </View>
@@ -109,7 +122,7 @@ export default function TimerScreen() {
         {/* Phase hint */}
         <Text style={[styles.phaseHint, { color: colors.textMuted }]}>
           {phase === 'work'
-            ? `${settings.pomodorosBeforeLongBreak - cyclePosition} until long break`
+            ? `${settings.pomodorosBeforeLongBreak - cyclePosition} focus session${settings.pomodorosBeforeLongBreak - cyclePosition === 1 ? '' : 's'} until long break`
             : phase === 'shortBreak'
               ? 'short break — stretch & breathe'
               : 'long break — you earned it 🎉'}
@@ -119,6 +132,7 @@ export default function TimerScreen() {
       {/* Bottom sheets */}
       <SettingsSheet ref={settingsRef} />
       <LogSheet ref={logRef} />
+      <PhaseSwitcherSheet ref={phaseRef} />
     </Animated.View>
   );
 }

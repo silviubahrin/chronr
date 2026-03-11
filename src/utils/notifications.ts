@@ -65,7 +65,6 @@ export async function scheduleTimerNotification(
             },
             trigger: {
                 seconds,
-                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
             },
         });
     } catch (e) {

@@ -18,7 +18,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const systemScheme = useColorScheme();
-    const [mode, setModeState] = useState<ThemeMode>('dark');
+    const [mode, setModeState] = useState<ThemeMode>('system');
 
     // Load saved preference
     useEffect(() => {
@@ -34,14 +34,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         AsyncStorage.setItem(STORAGE_KEYS.THEME, m);
     }, []);
 
-    const toggle = useCallback(() => {
-        setMode(mode === 'dark' ? 'light' : 'dark');
-    }, [mode, setMode]);
-
     const isDark =
         mode === 'system'
-            ? systemScheme !== 'light'
+            ? systemScheme === 'dark'
             : mode === 'dark';
+
+    const toggle = useCallback(() => {
+        if (mode === 'system') {
+            setMode(isDark ? 'light' : 'dark');
+        } else {
+            setMode(mode === 'dark' ? 'light' : 'dark');
+        }
+    }, [mode, isDark, setMode]);
 
     const colors = isDark ? DARK_THEME : LIGHT_THEME;
 
